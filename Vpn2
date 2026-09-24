@@ -1,0 +1,133 @@
+{
+  "dns": {
+    "queryStrategy": "UseIPv4",
+    "servers": [
+      "1.1.1.1",
+      "1.0.0.1"
+    ]
+  },
+  "routing": {
+    "domainMatcher": "hybrid",
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "type": "field",
+        "protocol": [
+          "bittorrent"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "network": "tcp,udp",
+        "balancerTag": "bal"
+      }
+    ],
+    "balancers": [
+      {
+        "tag": "bal",
+        "selector": [
+          "proxy-0"
+        ],
+        "strategy": {
+          "type": "leastPing"
+        },
+        "fallbackTag": "proxy-0"
+      }
+    ]
+  },
+  "inbounds": [
+    {
+      "port": 10808,
+      "protocol": "socks",
+      "settings": {
+        "auth": "noauth",
+        "udp": true
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ],
+        "enabled": true,
+        "routeOnly": false
+      },
+      "tag": "socks"
+    },
+    {
+      "port": 10809,
+      "protocol": "http",
+      "settings": {
+        "allowTransparent": false,
+        "auth": "noauth"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ],
+        "enabled": true,
+        "routeOnly": false
+      },
+      "tag": "http"
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "proxy-0",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "217.198.6.70",
+            "port": 443,
+            "users": [
+              {
+                "id": "1546044b-033e-4ffc-810f-e56aea667002",
+                "encryption": "none",
+                "flow": "xtls-rprx-vision"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "combochip.ru",
+          "publicKey": "rpkH5JCoKBH0DDusVNhVmFL_aoPlTyeH0BxDAIfzJ2M",
+          "shortId": "ce5ea8cfc9",
+          "fingerprint": "firefox",
+          "spiderX": "/"
+        }
+      }
+    },
+    {
+      "tag": "direct",
+      "protocol": "freedom"
+    },
+    {
+      "tag": "block",
+      "protocol": "blackhole"
+    }
+  ],
+  "burstObservatory": {
+    "subjectSelector": [
+      "proxy"
+    ],
+    "pingConfig": {
+      "destination": "http://www.gstatic.com/generate_204",
+      "interval": "5m",
+      "timeout": "10s",
+      "sampling": 2
+    }
+  },
+  "remarks": "YouTube_noADS-NEW📺",
+  "log": {
+    "access": "/data/user/0/com.happproxy/files/logs/access/access_log.txt",
+    "error": "/data/user/0/com.happproxy/files/logs/error/1790255909072_error_log.txt"
+  }
+}
