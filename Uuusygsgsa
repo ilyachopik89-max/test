@@ -1,0 +1,428 @@
+{
+  "dns": {
+    "tag": "dns-in",
+    "servers": [
+      "8.8.8.8",
+      "9.9.9.9"
+    ],
+    "queryStrategy": "UseIPv4"
+  },
+  "log": {
+    "loglevel": "warning",
+    "access": "/data/user/0/com.happproxy/files/logs/access/access_log.txt",
+    "error": "/data/user/0/com.happproxy/files/logs/error/1790319033786_error_log.txt"
+  },
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "protocol": [
+          "bittorrent"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "domain:mtalk.google.com",
+          "domain:push.apple.com",
+          "domain:api.push.apple.com",
+          "domain:push-apple.com.akadns.net",
+          "domain:courier.push.apple.com",
+          "domain:yandex.com",
+          "domain:yandex.net",
+          "domain:mail.ru",
+          "domain:vk.com",
+          "domain:vkusvill.ru",
+          "domain:ozon.ru",
+          "domain:wildberries.ru",
+          "domain:sberbank.ru",
+          "domain:tinkoff.ru",
+          "domain:gosuslugi.ru",
+          "domain:nalog.gov.ru",
+          "domain:mos.ru",
+          "domain:2gis.com",
+          "domain:2gis.ru"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "ip": [
+          "17.0.0.0/8"
+        ],
+        "type": "field",
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "domain:habr.com",
+          "domain:4pda.to",
+          "domain:4pda.ru",
+          "geosite:telegram",
+          "domain:microsoft.com",
+          "domain:microsoftonline.com",
+          "domain:azure.com"
+        ],
+        "balancerTag": "balancer"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:private",
+          "geosite:category-ru"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "ip": [
+          "geoip:ru",
+          "geoip:private"
+        ],
+        "type": "field",
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "network": "tcp,udp",
+        "balancerTag": "balancer"
+      }
+    ],
+    "balancers": [
+      {
+        "tag": "balancer",
+        "selector": [
+          "proxy"
+        ],
+        "strategy": {
+          "type": "leastLoad",
+          "settings": {
+            "maxRTT": "1500ms",
+            "expected": 1,
+            "baselines": [
+              "150ms",
+              "300ms",
+              "600ms"
+            ],
+            "tolerance": 0.25
+          }
+        },
+        "fallbackTag": "direct"
+      }
+    ],
+    "domainMatcher": "hybrid",
+    "domainStrategy": "IPIfNonMatch"
+  },
+  "inbounds": [
+    {
+      "tag": "socks",
+      "port": 10808,
+      "protocol": "socks",
+      "settings": {
+        "udp": true,
+        "auth": "noauth"
+      },
+      "sniffing": {
+        "enabled": true,
+        "routeOnly": false,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ]
+      }
+    },
+    {
+      "tag": "http",
+      "port": 10809,
+      "protocol": "http",
+      "settings": {
+        "allowTransparent": false,
+        "auth": "noauth"
+      },
+      "sniffing": {
+        "enabled": true,
+        "routeOnly": false,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ]
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "fin.elusionvpncom.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "48e79ba9-eda4-4afb-b845-91f32c1c3aa9",
+                "encryption": "none",
+                "flow": "xtls-rprx-vision"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "tcpSettings": {},
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "fin.elusionvpncom.com",
+          "publicKey": "ctJoDYN80vdNFYNFwn_r2yH3iJxKruJ6qqItKlkBemA",
+          "shortId": "c12f91f1eff68c5b",
+          "spiderX": "/",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "proxy-2",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "gr3.elusionvpncom.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "48e79ba9-eda4-4afb-b845-91f32c1c3aa9",
+                "encryption": "none",
+                "flow": "xtls-rprx-vision"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "tcpSettings": {},
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "gr3.elusionvpncom.com",
+          "publicKey": "PKLgeNYzpsS9fx089U2tnqvzBh_epffwTkM9I-jHLBU",
+          "shortId": "9e2c1a7b3d4f865a",
+          "spiderX": "/",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "proxy-3",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "gr2.elusionvpncom.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "48e79ba9-eda4-4afb-b845-91f32c1c3aa9",
+                "encryption": "none",
+                "flow": "xtls-rprx-vision"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "tcpSettings": {},
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "gr2.elusionvpncom.com",
+          "publicKey": "sg3l1ydpp_kcpxApDmOPB5b4kNk2KIfzQrFrdFlPsHw",
+          "shortId": "32dade2baa51593a",
+          "spiderX": "/",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "proxy-4",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "se2.elusionvpncom.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "48e79ba9-eda4-4afb-b845-91f32c1c3aa9",
+                "encryption": "none",
+                "flow": "xtls-rprx-vision"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "tcpSettings": {},
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "se2.elusionvpncom.com",
+          "publicKey": "o3SoBIs8gB8GzV4MnNjIYnDbu4Wl1xYjIiCT0P6cxWk",
+          "shortId": "67e03db029c83f4f",
+          "spiderX": "/",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "proxy-5",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "lt1.elusionvpncom.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "48e79ba9-eda4-4afb-b845-91f32c1c3aa9",
+                "encryption": "none",
+                "flow": "xtls-rprx-vision"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "tcpSettings": {},
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "lt1.elusionvpncom.com",
+          "publicKey": "8n7BW_F1QmukGwu8R_Lh8JvPvcZbDLsy-KA_MnnndyY",
+          "shortId": "a7c3e91f6b2d8405",
+          "spiderX": "/",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "proxy-6",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "pl1.elusionvpncom.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "48e79ba9-eda4-4afb-b845-91f32c1c3aa9",
+                "encryption": "none",
+                "flow": "xtls-rprx-vision"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "tcpSettings": {},
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "pl1.elusionvpncom.com",
+          "publicKey": "q3tb0EP3o-NYim9pzNlkesFO66-JWnN0Y3R7nxWREgM",
+          "shortId": "c1d4a7e9b3f8625e",
+          "spiderX": "/",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "proxy-7",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "nl3.elusionvpn.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "48e79ba9-eda4-4afb-b845-91f32c1c3aa9",
+                "encryption": "none",
+                "flow": "xtls-rprx-vision"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "tcpSettings": {},
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "nl3.elusionvpn.com",
+          "publicKey": "UTRE0YFgI0xPpMneL6sd_4nZgIkpHwIBKlXsFxKkFFI",
+          "shortId": "f0b37ce461d8925a",
+          "spiderX": "/",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "proxy-8",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "us1.elusionvpncom.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "48e79ba9-eda4-4afb-b845-91f32c1c3aa9",
+                "encryption": "none",
+                "flow": "xtls-rprx-vision"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "tcpSettings": {},
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "us1.elusionvpncom.com",
+          "publicKey": "7i7CoPWik3nTf_rbH8jav3u_z4zCtn_wlhS0IMMwTCM",
+          "shortId": "f46a91c82d7be305",
+          "spiderX": "/",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "direct",
+      "protocol": "freedom"
+    },
+    {
+      "tag": "block",
+      "protocol": "blackhole"
+    }
+  ],
+  "burstObservatory": {
+    "pingConfig": {
+      "timeout": "5s",
+      "interval": "300s",
+      "sampling": 3,
+      "destination": "http://www.gstatic.com/generate_204",
+      "connectivity": ""
+    },
+    "subjectSelector": [
+      "proxy"
+    ]
+  },
+  "remarks": "🇪🇺 Автовыбор ⚡️",
+  "meta": {
+    "serverDescription": "Основные сервера — 10 GB/s"
+  }
+}
