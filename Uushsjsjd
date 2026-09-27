@@ -1,0 +1,211 @@
+{
+  "dns": {
+    "servers": [
+      "1.1.1.1",
+      "8.8.8.8",
+      {
+        "port": 53,
+        "address": "77.88.8.8",
+        "domains": [
+          "geosite:private",
+          "geosite:category-ru",
+          "domain:gstatic.com"
+        ]
+      }
+    ],
+    "queryStrategy": "UseIPv4"
+  },
+  "routing": {
+    "rules": [
+      {
+        "port": "443",
+        "network": "udp",
+        "outboundTag": "BLOCK"
+      },
+      {
+        "ip": [
+          "77.88.8.8"
+        ],
+        "outboundTag": "DIRECT"
+      },
+      {
+        "protocol": [
+          "bittorrent"
+        ],
+        "outboundTag": "DIRECT"
+      },
+      {
+        "domain": [
+          "domain:gosuslugi.ru",
+          "domain:gov.ru",
+          "domain:fsb.ru",
+          "domain:mos.ru",
+          "domain:megamarket.ru",
+          "domain:kuper.ru",
+          "domain:megamarket.tech",
+          "domain:rustore.ru",
+          "domain:russianpost.ru",
+          "domain:nspk.ru",
+          "domain:appsflyersdk.com",
+          "domain:burgerkingrus.ru",
+          "domain:mindbox.ru",
+          "domain:f6.security",
+          "domain:vk-analytics.ru",
+          "domain:yandex.fi",
+          "domain:yandex.kz",
+          "domain:yandex.ru",
+          "domain:yandex.net",
+          "domain:yandex.md",
+          "domain:yandex.com.tr",
+          "domain:fasten.ru",
+          "domain:yastatic.net",
+          "domain:kinopoisk.ru",
+          "domain:yandex.com",
+          "domain:my-manager-account.com",
+          "domain:wildberries.ru",
+          "domain:wildberries.eu",
+          "domain:wb.ru",
+          "domain:alfabank.ru",
+          "domain:tbank.ru",
+          "domain:otpbank.ru",
+          "domain:sber.ru",
+          "domain:max.ru",
+          "domain:oneme.su",
+          "domain:okcdn.ru",
+          "domain:userapi.com",
+          "domain:vkuserphoto.ru",
+          "domain:vkuser.net",
+          "domain:studilka.ru",
+          "domain:cdn.ciliz.com",
+          "domain:vkvideo.ru",
+          "domain:trbcdn.net",
+          "domain:cdnvideo.ru",
+          "domain:ngenix.net",
+          "domain:mts.ru",
+          "domain:yota.ru",
+          "domain:beeline.ru",
+          "domain:megafon.ru",
+          "domain:2gis.com",
+          "domain:2gis.ru",
+          "domain:ok.com",
+          "domain:ok.ru",
+          "domain:samokat.ru",
+          "domain:nalog.ru",
+          "domain:vkusnoitochka.ru",
+          "domain:qsrapp.ru",
+          "domain:ozon.ru",
+          "domain:ozone.ru",
+          "domain:rutube.ru",
+          "domain:rutubelist.ru",
+          "domain:rtbcdn.ru",
+          "domain:vigo.tech",
+          "domain:rostics.ru",
+          "domain:mirconnect.ru",
+          "domain:sbrf.ru",
+          "domain:3dsvtb.ru",
+          "domain:yoomoney.ru",
+          "domain:vtb.ru",
+          "domain:mail.ru",
+          "domain:apiblink.ru",
+          "domain:hexawall.ru",
+          "domain:uni.rest",
+          "domain:avito.ru",
+          "domain:avito.st",
+          "domain:uxfeedback.ru",
+          "domain:urentbike.ru",
+          "domain:urent.ru",
+          "domain:wavesend.ru",
+          "domain:vkusvill.ru",
+          "domain:whoosh.bike",
+          "geosite:vk",
+          "geosite:category-gov-ru",
+          "geosite:yandex"
+        ],
+        "network": "tcp,udp",
+        "outboundTag": "DIRECT"
+      },
+      {
+        "network": "tcp,udp",
+        "outboundTag": "proxy"
+      }
+    ]
+  },
+  "inbounds": [
+    {
+      "tag": "socks",
+      "port": 10808,
+      "listen": "127.0.0.1",
+      "protocol": "socks",
+      "settings": {
+        "udp": true,
+        "auth": "noauth"
+      },
+      "sniffing": {
+        "enabled": true,
+        "routeOnly": false,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ]
+      }
+    },
+    {
+      "tag": "http",
+      "port": 10809,
+      "listen": "127.0.0.1",
+      "protocol": "http",
+      "settings": {
+        "auth": "noauth"
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "protocol": "hysteria",
+      "settings": {
+        "address": "213.165.53.197",
+        "port": 443,
+        "version": 2
+      },
+      "streamSettings": {
+        "network": "hysteria",
+        "hysteriaSettings": {
+          "version": 2,
+          "auth": "3e4a4b0e-8e61-4f4a-9703-b955747b6cc4"
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "data-1.1984vpn.ru",
+          "enableSessionResumption": false,
+          "fingerprint": "chrome",
+          "alpn": [
+            "h3"
+          ]
+        },
+        "finalmask": {
+          "quicParams": {
+            "brutalUp": "1010010110 Mbps",
+            "brutalDown": "101001010101 Mbps",
+            "congestion": "brutal"
+          }
+        }
+      }
+    },
+    {
+      "tag": "BLOCK",
+      "protocol": "blackhole"
+    },
+    {
+      "tag": "DIRECT",
+      "protocol": "freedom"
+    }
+  ],
+  "remarks": "🇩🇪 Германия GAMING",
+  "description": "Сброс трафика: без сброса",
+  "log": {
+    "access": "/data/user/0/com.happproxy/files/logs/access/access_log.txt",
+    "error": "/data/user/0/com.happproxy/files/logs/error/1790513443521_error_log.txt"
+  }
+}
