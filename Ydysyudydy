@@ -1,0 +1,101 @@
+{
+  "dns": {
+    "servers": [
+      {
+        "address": "1.1.1.1"
+      },
+      {
+        "address": "77.88.8.8"
+      }
+    ]
+  },
+  "inbounds": [
+    {
+      "port": 10808,
+      "protocol": "socks",
+      "settings": {
+        "auth": "noauth",
+        "udp": true,
+        "userLevel": 8
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls",
+          "fakedns",
+          "quic"
+        ],
+        "enabled": true
+      },
+      "tag": "socks"
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "slark.netseclabs.gr",
+            "port": 443,
+            "users": [
+              {
+                "id": "fa152bf9-b07a-4564-bb3b-cd33947b6c4a",
+                "flow": "xtls-rprx-vision",
+                "encryption": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "fingerprint": "firefox",
+          "publicKey": "re150yZP0-1nDd1cPSHqoMXMM-_kSmB-fMGSRVBgew4",
+          "serverName": "slark.netseclabs.gr",
+          "shortId": "6ba85179e30d"
+        }
+      }
+    },
+    {
+      "protocol": "freedom",
+      "tag": "direct"
+    },
+    {
+      "protocol": "blackhole",
+      "tag": "block"
+    }
+  ],
+  "remarks": "🇩🇪 Германия №1",
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "ip": [
+          "geoip:private"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "domain": [
+          "geosite:category-ru"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "protocol": [
+          "bittorrent"
+        ],
+        "outboundTag": "block",
+        "type": "field"
+      }
+    ]
+  },
+  "log": {
+    "access": "/data/user/0/com.happproxy/files/logs/access/access_log.txt",
+    "error": "/data/user/0/com.happproxy/files/logs/error/1790497449575_error_log.txt"
+  }
+}
