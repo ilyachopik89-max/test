@@ -1,0 +1,759 @@
+local genv, version, Library, ThemeManager, SaveManager
+
+do
+	local str = "https://raw.githubusercontent.com/uhfork/Obsidian/refs/heads/main/"
+	genv = getgenv and getgenv() or _G
+	genv.__PoopHubShared = genv.__PoopHubShared or {}
+	local poopHubShared = genv.__PoopHubShared
+	version = "Unknown"
+
+	pcall(function()
+		version = "V5.1.5"
+	end)
+
+	getShared = function(arg, arg2)
+		if not poopHubShared[arg] then
+			poopHubShared[arg] = arg2()
+		end
+
+		return poopHubShared[arg]
+	end
+
+	Library = getShared("Library", function()
+		return loadstring(game:HttpGet("https://doitenroi.win/paste/0fggDBfu/raw"))()
+	end)
+
+	ThemeManager = getShared("ThemeManager", function()
+		return loadstring(game:HttpGet("https://doitenroi.win/paste/M6JGuRBu/raw"))()
+	end)
+
+	SaveManager = getShared("SaveManager", function()
+		return loadstring(game:HttpGet("https://doitenroi.win/paste/FOrFG4oS/raw"))()
+	end)
+end
+
+genv.Library = Library
+genv.ThemeManager = ThemeManager
+genv.SaveManager = SaveManager
+local getCustomIcon = Library.GetCustomIcon
+
+Library.GetCustomIcon = function(arg, arg2)
+	if typeof(arg2) == "string" and string.find(arg2, "rbxasset://") then
+		return { Url = arg2, ImageRectOffset = Vector2.zero, ImageRectSize = Vector2.zero, Custom = true }
+	end
+	return getCustomIcon(arg, arg2)
+end
+
+genv.Services = getShared("Services", function()
+	return {
+		Players = game:GetService("Players"),
+		ReplicatedStorage = game:GetService("ReplicatedStorage"),
+		RunService = game:GetService("RunService"),
+		Workspace = game:GetService("Workspace"),
+		UserInputService = game:GetService("UserInputService"),
+		TweenService = game:GetService("TweenService"),
+	}
+end)
+
+local options
+options = Library.Options
+local toggles
+toggles = Library.Toggles
+local tbl
+
+tbl = {
+	Zaako = "rbxassetid://79347646107717",
+	Poop = "rbxassetid://130990339683290",
+	Rust = "rbxassetid://138750331387064",
+	["Hit Marker"] = "rbxassetid://133749572213659",
+	Neverlose = "rbxassetid://94970221280272",
+	Onichan = "rbxassetid://114361503583259",
+	WTF = "rbxassetid://136585577123891",
+	["Ahh~"] = "rbxassetid://140095282951107",
+	Minecraft = "rbxassetid://135478009117226",
+	Mambo = "rbxassetid://124373733066783",
+	["I got this"] = "rbxassetid://140084776912218",
+	["Villager Died"] = "rbxassetid://3267691010",
+	["Minecraft 2"] = "rbxassetid://5176930264",
+}
+
+local notify_ = Library.Notify
+
+Library.Notify = function(arg, arg2, arg3)
+	if Library.Options and Library.Options.NotificationSoundOn and Library.Options.NotificationSoundOn.Value then
+		local soundId = Library.Options.NotificationSoundSelect and Library.Options.NotificationSoundSelect.Value
+		soundId = soundId and tbl[soundId]
+
+		if soundId then
+			pcall(function()
+				local sound = Instance.new("Sound")
+				sound.SoundId = soundId
+				sound.Volume = 1
+				sound.Parent = game:GetService("SoundService")
+				sound:Play()
+
+				sound.Ended:Connect(function()
+					sound:Destroy()
+				end)
+			end)
+		end
+	end
+
+	return notify_(arg, arg2, arg3)
+end
+
+_G._NOTIFY = function(arg, arg2)
+	if type(arg) == "table" then
+		if not arg.BigIcon then
+			arg.BigIcon = AdImage
+		end
+	else
+		local str = tostring(arg)
+		local pos = str:find(":")
+		local flag = pos and not str:find("https?://")
+		local str2 = "PoopHub"
+
+		if flag then
+			str2 = str:sub(1, pos - 1)
+			str = str:sub(pos + 1):gsub("^%s+", "")
+		end
+
+		arg = { Title = str2, Description = str, BigIcon = AdImage, Time = type(arg2) == "number" and arg2 or 4 }
+	end
+
+	Library:Notify(arg)
+end
+
+genv._NOTIFY = _G._NOTIFY
+local players, replicatedStorage, runService, workspace_, userInputService
+local services = genv.Services
+players = services.Players
+replicatedStorage = services.ReplicatedStorage
+runService = services.RunService
+workspace_ = services.Workspace
+userInputService = services.UserInputService
+local localPlayer
+localPlayer = players.LocalPlayer
+local spawnToyRemoteFunction
+spawnToyRemoteFunction = replicatedStorage:WaitForChild("MenuToys"):WaitForChild("SpawnToyRemoteFunction")
+local ragdollRemote
+ragdollRemote = replicatedStorage:WaitForChild("CharacterEvents"):WaitForChild("RagdollRemote")
+local v
+v = workspace_:FindFirstChild(localPlayer.Name .. "SpawnedInToys")
+while not v do
+	task.wait(0.25)
+	v = workspace_:FindFirstChild(localPlayer.Name .. "SpawnedInToys")
+end
+local setNetworkOwner
+setNetworkOwner = replicatedStorage:WaitForChild("GrabEvents"):WaitForChild("SetNetworkOwner")
+replicatedStorage:WaitForChild("MenuToys"):WaitForChild("DestroyToy")
+replicatedStorage:WaitForChild("GameCorrectionEvents"):WaitForChild("StopAllVelocity")
+replicatedStorage:WaitForChild("CharacterEvents"):WaitForChild("Struggle")
+replicatedStorage:WaitForChild("GrabEvents", 9e9):WaitForChild("CreateGrabLine", 9e9)
+local look
+look = replicatedStorage.CharacterEvents.Look
+
+safeGetRagdollRemote = function()
+	local ok, result = pcall(function()
+		return replicatedStorage:WaitForChild("CharacterEvents", 1):WaitForChild("RagdollRemote", 1)
+	end)
+
+	return ok and result or nil
+end
+
+local v2
+v2 = safeGetRagdollRemote()
+local playerGui
+
+do
+	local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+	local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+	local humanoid_ = character:WaitForChild("Humanoid")
+	playerGui = localPlayer:WaitForChild("PlayerGui")
+
+	localPlayer.CharacterAdded:Connect(function(character2)
+		character = character2
+		humanoidRootPart = character2:WaitForChild("HumanoidRootPart")
+		humanoid_ = character2:WaitForChild("Humanoid")
+	end)
+end
+
+local tbl2
+
+tbl2 = {
+	skyTpEnabled = false,
+	kickSpam = false,
+	rebuildActive = false,
+	wasdControlEnabled = false,
+	wasdMoveSpeed = 1,
+	torseFreezeEnabled = false,
+	hvhTrackEnabled = false,
+	hvhTargetPlayer = nil,
+	blobmanAuraEnabled = false,
+	blobmanAuraMode = "Kill Aura",
+	blobmanAllEnabled = false,
+	blobmanAllMode = "All Kill",
+	blobmanAuraRunning = false,
+	blobmanAllRunning = false,
+	whitelistEnabled = false,
+	targetWalkSpeed = 16,
+	targetJumpPower = 50,
+	targetKillEnabled = false,
+	targetKillRunning = false,
+	selectedTargetPlayer = nil,
+	lastTargetPosition = nil,
+	antiAntiLagEnabled = false,
+	characterWalkSpeedEnabled = false,
+	characterWalkSpeed = 1,
+	characterJumpPowerEnabled = false,
+	characterJumpPower = 50,
+	characterInfJumpEnabled = false,
+	characterFOV = 70,
+	characterSpinEnabled = false,
+	characterSpinSpeed = 5,
+	characterSpinAngle = 0,
+	thirdPersonEnabled = false,
+	headEnabled = false,
+	legsEnabled = false,
+	obeyPartEnabled = false,
+	obeyAllEnabled = false,
+	feetTPDeleteEnabled = false,
+	headViewEnabled = false,
+	radius = 20,
+	speed = 3,
+	height = 3,
+	lerpAlpha = 0.25,
+	obeyRightDistance = 5,
+	selectedPlayerName = nil,
+	selectedPart = "Head",
+	ragdollRunning = false,
+	autoRunEnabled = false,
+	targetToyName = "CreatureBlobman",
+	currentInstance = nil,
+	activeConnection = nil,
+	originalPos = nil,
+	WingsActive = false,
+	SelectedItem = "TetracubeI",
+	SearchMode = "My Toys",
+	WingSpeed = 2,
+	WingAngle = 30,
+	WingLength = 5,
+	TimeCounter = 0,
+	autoSitEnabled = false,
+	selectedPlayerFolderId = nil,
+	antiblob = false,
+	antigraba = false,
+	antiLag1 = false,
+	protectionEnabled = false,
+	infjump = false,
+	danceEnabled = false,
+	selectedDance = "Take The L",
+	danceIntensity = 1,
+	playerLocationVisualEnabled = false,
+	oceanRainbowEnabled = false,
+	shurikenESPEnabled = false,
+	rainbowSpeedESP = 2,
+	hvhBlobSitLoopEnabled = false,
+	verticalMoveAmount = 0,
+	loopKickBlobActive = false,
+	loopKickBlobTarget = nil,
+	loopKickBlobAllActive = false,
+	loopKickBlobMode = "Default",
+	notificationSoundEnabled = false,
+	selectedNotificationSound = "Ahh~",
+	locationESPCornerEnabled = true,
+	locationESPThickness = 2,
+	locationESPCornerRoundness = 0,
+	locationESPLength = 12,
+	locationESPRotationSpeed = 90,
+	locationESPExpandSpeed = 3,
+	locationESPMinRadius = 15,
+	locationESPMaxRadius = 35,
+	locationESPSmoothingEnabled = true,
+	locationESPSmoothingSpeed = 15,
+	locationESPColor = Color3.fromRGB(160, 0, 255),
+	locationESPGradientEnabled = false,
+	locationESPGradientColor1 = Color3.fromRGB(160, 0, 255),
+	locationESPGradientColor2 = Color3.fromRGB(0, 230, 255),
+	locationESPGradientSpeed = 1,
+	locationESPUIGradientAngle = 0,
+	locationESPUIGradientAutoRotate = false,
+	locationESPUIGradientAutoSpeed = 20,
+	locationESPPartEnabled = false,
+	locationESPPartTransparency = 0.7,
+	locationESPPartMaterial = "Neon",
+	locationESPPartColor = Color3.fromRGB(160, 0, 255),
+	locationESPBoxOutlineEnabled = false,
+	locationESPBoxOutlineColor = Color3.fromRGB(255, 255, 255),
+	locationESPBoxOutlineThickness = 0.05,
+	locationESPCornerOutlineEnabled = false,
+	locationESPCornerOutlineColor = Color3.fromRGB(0, 0, 0),
+	locationESPCornerOutlineThickness = 1,
+	locationESPGlowEnabled = false,
+	locationESPGlowColor1 = Color3.fromRGB(160, 0, 255),
+	locationESPGlowColor2 = Color3.fromRGB(0, 230, 255),
+	locationESPGlowTransparency = 0.5,
+	locationESPGlowSize = 20,
+	locationESPTrailEnabled = false,
+	locationESPTrailColor = Color3.fromRGB(160, 0, 255),
+	locationESPTrailLifetime = 0.5,
+	kickTargetPlayerDisplay = "All Players",
+	kickTargetMethod = "Blobman Kick V2",
+	kickTargetHeightMode = "Spawn",
+	kickExcludeFriends = true,
+	kickUseWhitelist = true,
+	noksEspEnabled = false,
+	noksBoxEnable = false,
+	noksBoxColor1 = Color3.fromRGB(180, 140, 255),
+	noksBoxColor2 = Color3.fromRGB(100, 50, 200),
+	noksBoxGradient = false,
+	noksBoxOutline = false,
+	noksBoxOutlineColor1 = Color3.fromRGB(10, 10, 10),
+	noksBoxOutlineColor2 = Color3.fromRGB(40, 40, 40),
+	noksBoxOutlineGradient = false,
+	noksBoxStrokeThickness = 1.5,
+	noksBoxStrokeTrans = 30,
+	noksBoxCornerRadius = 4,
+	noksMaxBoxHeight = 350,
+	noksNameEnable = false,
+	noksNameColor = Color3.fromRGB(255, 255, 255),
+	noksNameGradient = false,
+	noksTextGradColor1 = Color3.fromRGB(255, 110, 110),
+	noksTextGradColor2 = Color3.fromRGB(255, 230, 110),
+	noksNameScrollSpeed = 4,
+	noksTextFont = "GothamBold",
+	noksTextSize = 11,
+	noksTextStrokeThickness = 1,
+	noksTextStrokeTrans = 30,
+	noksLineEnable = false,
+	noksLineColor1 = Color3.fromRGB(0, 230, 255),
+	noksLineColor2 = Color3.fromRGB(255, 0, 150),
+	noksLineGradient = false,
+	noksLineThickness = 2,
+	noksLineOutline = false,
+	noksLineOutlineColor = Color3.fromRGB(0, 0, 0),
+	noksLineStrokeThickness = 1,
+	noksLineOrigin = "Bottom",
+	noksLineAttachment = "Bottom",
+	noksHealthBarEnable = false,
+	noksHealthBarWidth = 3,
+	noksHealthBarOffset = 6,
+	noksHealthTextEnable = false,
+	noksHealthGradient = false,
+	noksHealthGrad1 = Color3.fromRGB(50, 255, 100),
+	noksHealthGrad2 = Color3.fromRGB(255, 220, 50),
+	noksHealthGrad3 = Color3.fromRGB(255, 50, 50),
+	noksDistanceEnable = false,
+	noksDistanceColor = Color3.fromRGB(240, 240, 240),
+	noksMaxDistance = 2000,
+	noksFlagsEnable = false,
+	noksFlagSpacing = 2,
+	noksFlagTextSize = 9,
+	noksFlagNameEnable = true,
+	noksFlagNameColor = Color3.fromRGB(220, 220, 220),
+	noksFlagWeaponEnable = true,
+	noksFlagWeaponColor = Color3.fromRGB(200, 200, 200),
+	noksFlagStateEnable = true,
+	noksFlagStateColor = Color3.fromRGB(255, 150, 50),
+	noksFlagTeamEnable = false,
+	noksBoxFill = false,
+	noksGradientFill = false,
+	noksGradientColor1 = Color3.fromRGB(140, 90, 255),
+	noksGradientColor2 = Color3.fromRGB(0, 230, 255),
+	noksBoxFillOpacity1 = 25,
+	noksBoxFillOpacity2 = 5,
+	noksGradientRotate = false,
+	noksRotateSpeed = 3,
+	noksSkeletonEnable = false,
+	noksSkeletonThickness = 2,
+	noksSkeletonGradient = false,
+	noksSkeletonColor1 = Color3.fromRGB(180, 140, 255),
+	noksSkeletonColor2 = Color3.fromRGB(0, 230, 255),
+	noksSkeletonScroll = false,
+	noksSkeletonScrollSpeed = 4,
+	noksChamsEnable = false,
+	noksChamsFillColor = Color3.fromRGB(140, 90, 255),
+	noksChamsOutlineColor = Color3.fromRGB(255, 255, 255),
+	noksChamsFillTransparency = 50,
+	noksChamsOutlineTransparency = 0,
+	noksChamsOcclusion = "Always See",
+	lc_cc_on = false,
+	lc_cc_tint = Color3.fromRGB(255, 255, 255),
+	lc_cc_sat = 0,
+	lc_cc_con = 0,
+	lc_cc_bri = 0,
+	lc_bloom_on = false,
+	lc_bloom_int = 50,
+	lc_bloom_size = 24,
+	lc_bloom_thresh = 90,
+	lc_sun_on = false,
+	lc_sun_int = 10,
+	lc_sun_spread = 50,
+	lc_dof_on = false,
+	lc_dof_far = 0,
+	lc_dof_near = 100,
+	lc_dof_dist = 50,
+	lc_dof_rad = 10,
+	lc_blur_on = false,
+	lc_blur_size = 0,
+	noksFadeOutEnable = false,
+	noksFadeDuration = 1.2,
+	haloEnabled = false,
+	haloColor = Color3.fromRGB(133, 220, 255),
+	haloRate = 7,
+	haloBrightness = 2,
+	haloOffsetY = 1.5,
+	haloOffsetX = 0,
+	haloOffsetZ = 0,
+	haloAttOffsetY = 0.93,
+	auraEnabled = false,
+	auraColor = Color3.fromRGB(133, 220, 255),
+	auraRate = 20,
+	auraBrightness = 2,
+	auraOffsetY = 0,
+	auraOffsetX = 0,
+	auraOffsetZ = 0,
+	angelEnabled = false,
+	angelColor = Color3.fromRGB(133, 220, 255),
+	angelRate = 4,
+	angelBrightness = 1,
+	angelOffsetY = 0,
+	angelOffsetX = 0,
+	angelWingSpread = 1,
+	trailEnabled = false,
+	trailColor = Color3.fromRGB(133, 220, 255),
+	trailWidth = 1.5,
+	trailLifetime = 0.4,
+	rainbowEnabled = false,
+	rainbowSpeed = 0.5,
+	rainbowHalo = true,
+	rainbowAura = true,
+	rainbowAngel = true,
+	rainbowTrail = true,
+	mcTexturesEnabled = false,
+	mcTileSize = 4,
+	mcTexturesDebug = false,
+	mcFontEnabled = false,
+	mcFontAutoApply = false,
+	mcFontDebug = false,
+	customBlackholeEnabled = false,
+	customBlackholeImage = "https://github.com/public-account-7/somebackup/blob/main/Ultimate%20Rainbow%20Poop.png?raw=true",
+	kickAuraEnabled = false,
+	kickAuraRange = 30,
+	kickAuraCooldown = 0.8,
+	kickAuraFriendWhitelist = false,
+	lineColor1 = Color3.fromRGB(255, 0, 0),
+	lineColor2 = Color3.fromRGB(0, 0, 255),
+	lineColor3 = Color3.fromRGB(0, 255, 0),
+	lineColor4 = Color3.fromRGB(255, 255, 0),
+	lineColor5 = Color3.fromRGB(255, 0, 255),
+	lineColor6 = Color3.fromRGB(0, 255, 255),
+	IncreaseLineExtend = 3,
+}
+
+local tbl3
+
+tbl3 = {
+	Wings = {},
+	connections = {},
+	visualConnections = {},
+	rainbowParts = {},
+	espObjects = {},
+	rainbowHue = 0,
+	whitelistedPlayers = {},
+	targetItems = {},
+	antiExplosionConnection = nil,
+	characterAddedConn = nil,
+	kickAuraBlobman = nil,
+	kickAuraCooldowns = {},
+	forceDisabledPlayers = {},
+	kickAuraConnection = nil,
+	forceDisabledConnection = nil,
+}
+
+local tbl4
+
+tbl4 = {
+	ANTI_DURATION = 0.5,
+	SPAWN_POS = Vector3.new(0, 1e15, 0),
+	partsPosition = Vector3.new(1, -6, 1),
+	tpExitPosition = Vector3.one,
+	randomPositions = {
+		Vector3.new(282, -4.5, 470),
+		Vector3.new(570, 124, -93),
+		Vector3.new(530, 96, -376),
+		Vector3.new(-500, -6, -155),
+		Vector3.new(-560, -6, 86),
+	},
+	Offsets = { CFrame.new(-4.125, 0, 1), CFrame.new(4.125, 0, 1) },
+	ATTACK_TARGETS = { "CreatureBlobman", "TractorRed", "TractorGreen", "TractorOrange" },
+	AllowedItems = {
+		FoodHamburger = true,
+		FoodCoconut = true,
+		FoodPizzaCheese = true,
+		FoodPizzaPepperoni = true,
+		FoodHotdog = true,
+		FoodMushroomPoison = true,
+		FoodBread = true,
+		FoodDippyEgg = true,
+		FoodMayonnaise = true,
+		FoodFrenchFries = true,
+		FoodMeatStick = true,
+		FoodDonut = true,
+		FoodCakePink = true,
+		InstrumentGuitarBanjo = true,
+		InstrumentGuitarViolin = true,
+		InstrumentGuitarUkulele = true,
+		InstrumentWoodwindSaxophone = true,
+		InstrumentWoodwindOcarina = true,
+		InstrumentBrassVuvuzelaQwizik = true,
+		InstrumentBrassTrumpet = true,
+		InstrumentDrumBongos = true,
+		InstrumentDrumSnare = true,
+		InstrumentPianoMelodica = true,
+		InstrumentVoiceMicrophone = true,
+		CupMugWhite = true,
+		CupMugBrown = true,
+		PoopPile = true,
+		PoopPileSparkle = true,
+	},
+}
+
+local tbl5
+
+tbl5 = {
+	["Kill Grab"] = false,
+	["Sky Grab"] = false,
+	["Spin Grab"] = false,
+	["Teleport Up"] = false,
+	["Teleport Down"] = false,
+	["Chaos Grab"] = false,
+	["Supersonic Grab"] = false,
+	["Freeze Grab"] = false,
+	["Noclip Grab"] = false,
+}
+
+do
+	local tbl6 = {}
+	local flag = false
+
+	clearAntiRagdollConnections = function()
+		for _, v3 in ipairs(tbl6) do
+			if v3 and v3.Disconnect then
+				pcall(function()
+					v3:Disconnect()
+				end)
+			end
+		end
+
+		tbl6 = {}
+	end
+
+	protectHumanoid = function(arg)
+		if not arg or not flag then
+			return
+		end
+
+		pcall(function()
+			arg.BreakJointsOnDeath = false
+			arg.AutoRotate = true
+			arg.PlatformStand = false
+		end)
+
+		table.insert(tbl6, arg.HealthChanged:Connect(function(health)
+			if flag and health <= 0 and arg.Parent then
+				pcall(function()
+					arg.Health = 1
+				end)
+			end
+		end))
+
+		table.insert(tbl6, arg:GetPropertyChangedSignal("AutoRotate"):Connect(function()
+			if flag and arg.AutoRotate == false and arg.Parent then
+				pcall(function()
+					arg.AutoRotate = true
+				end)
+			end
+		end))
+
+		table.insert(tbl6, arg:GetPropertyChangedSignal("PlatformStand"):Connect(function()
+			if flag and arg.PlatformStand == true and arg.Parent then
+				pcall(function()
+					arg.PlatformStand = false
+				end)
+			end
+		end))
+
+		table.insert(tbl6, runService.RenderStepped:Connect(function()
+			if flag and arg and arg.Parent then
+				if arg.Sit and arg.SeatPart == nil then
+					pcall(function()
+						arg.Sit = false
+					end)
+				end
+			end
+		end))
+	end
+
+	onCharacterAddedForProtection = function(arg)
+		local humanoid_ = arg:FindFirstChild("Humanoid")
+
+		if humanoid_ and flag then
+			protectHumanoid(humanoid_)
+		end
+	end
+
+	setAntiRagdollProtection = function(arg)
+		flag = arg
+
+		if arg then
+			localPlayer.CharacterAdded:Connect(onCharacterAddedForProtection)
+			local character = localPlayer.Character
+			local humanoid_ = character and character:FindFirstChild("Humanoid")
+
+			if humanoid_ then
+				protectHumanoid(humanoid_)
+			end
+		else
+			clearAntiRagdollConnections()
+		end
+	end
+end
+
+getChar = function()
+	return localPlayer.Character or localPlayer.CharacterAdded:Wait()
+end
+
+getCharInfo = function()
+	local character = localPlayer.Character
+	return character, character and character:FindFirstChild("HumanoidRootPart"), character and character:FindFirstChildOfClass("Humanoid")
+end
+
+GetRepresentativePart = function(arg, arg2)
+	if not arg then
+		return nil
+	end
+
+	findAny = function(arg3)
+		for _, v3 in ipairs(arg3) do
+			local v4 = arg:FindFirstChild(v3)
+			if v4 and v4:IsA("BasePart") then
+				return v4
+			end
+		end
+	end
+
+	if arg2 == "Head" then
+		return findAny({ "Head" })
+	end
+
+	if arg2 == "HumanoidRootPart" then
+		return findAny({ "HumanoidRootPart", "Torso", "UpperTorso", "LowerTorso" })
+	end
+
+	if arg2 == "Left Arm" then
+		return findAny({ "LeftHand", "LeftUpperArm", "Left Arm", "LeftLowerArm" })
+	end
+
+	if arg2 == "Right Arm" then
+		return findAny({ "RightHand", "RightUpperArm", "Right Arm", "RightLowerArm" })
+	end
+
+	if arg2 == "Left Leg" then
+		return findAny({ "LeftFoot", "LeftLowerLeg", "Left Leg", "LeftUpperLeg" })
+	end
+
+	if arg2 == "Right Leg" then
+		return findAny({ "RightFoot", "RightLowerLeg", "Right Leg", "RightUpperLeg" })
+	end
+end
+
+GetPart = function(arg, arg2)
+	if not arg then
+		return {}
+	end
+	local tbl6 = {}
+
+	if arg2 == "HRP" then
+		tbl6 = { "HumanoidRootPart", "Torso", "UpperTorso" }
+	elseif arg2 == "Others" then
+		tbl6 = {
+			"Head",
+			"Left Arm",
+			"Right Arm",
+			"Left Leg",
+			"Right Leg",
+			"LeftUpperArm",
+			"RightUpperArm",
+			"LeftLowerArm",
+			"RightLowerArm",
+			"LeftHand",
+			"RightHand",
+			"LeftUpperLeg",
+			"RightUpperLeg",
+			"LeftLowerLeg",
+			"RightLowerLeg",
+			"LeftFoot",
+			"RightFoot",
+		}
+	end
+
+	local tbl7 = {}
+
+	for _, v3 in ipairs(tbl6) do
+		local v4 = arg:FindFirstChild(v3)
+
+		if v4 and v4:IsA("BasePart") then
+			table.insert(tbl7, v4)
+		end
+	end
+
+	return tbl7
+end
+
+GetPlayerList = function()
+	local tbl6 = {}
+
+	for _, player in pairs(players:GetPlayers()) do
+		if player ~= localPlayer then
+			table.insert(tbl6, player.Name)
+		end
+	end
+
+	return tbl6
+end
+
+GetPlayerListDisplay = function()
+	local tbl6 = {}
+
+	for _, player in ipairs(players:GetPlayers()) do
+		if player ~= localPlayer then
+			table.insert(tbl6, player.DisplayName .. " @" .. player.Name)
+		end
+	end
+
+	if #tbl6 == 0 then
+		table.insert(tbl6, "No Players")
+	end
+
+	return tbl6
+end
+
+ExtractUsername = function(arg)
+	if not arg or arg == "" or arg == "No Players" then
+		return nil
+	end
+	return arg:match("@(.+)$")
+end
+
+isWhitelisted = function(arg)
+	if not tbl2.whitelistEnabled then
+		return false
+	end
+
+	if arg == localPlayer then
+		return true
+	end
+
+	if localPlayer:IsFriendsWith(arg.UserId) then
+	
